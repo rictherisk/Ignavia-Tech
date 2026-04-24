@@ -542,9 +542,9 @@ async function send(){
   const t=addTyping();
 
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    const resp=await fetch('http://localhost:5000',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'application/json','x-api-key':'','anthropic-version':'2023-06-01'},
       body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:prompt,messages:[{role:'user',content:text}]})
     });
     const data=await resp.json();
