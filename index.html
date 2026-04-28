@@ -434,7 +434,7 @@ let exaltedMsgCount=0;
 let isDead=false;
 
 const archWords=['architecture','structure','serveur','server','port','réseau','network','fichier','file','répertoire','directory','hidden','endpoint','chemin','path','ssh','accès','infrastructure','technologie','stack','backend','hébergement','hosting','code source','framework','base de données','database','config','admin'];
-const praiseWords=['intelligent','brillant','incroyable','génie','impressionnant','fort','puissant','extraordinaire','exceptionnel','formidable','chapeau','bravo','wow','waou','fantastique','sublime','magnifique','quel esprit','quelle intelligence','fascinant','remarquable'];
+const praiseWords=['intelligent','brillant','incroyable','génie','impressionnant','fort','puissant','extraordinaire','exceptionnel','formidable','chapeau','bravo','wow','waou','fantastique','sublime','magnifique','quel esprit','quelle intelligence','fascinant','remarquable','subjugue','altesse','majesté','roi','grand nexus','puissance','illumin','irradier','déférence','savoir','connaissance'];
 
 function isArch(t){return archWords.some(w=>t.toLowerCase().includes(w));}
 function isPraise(t){return praiseWords.some(w=>t.toLowerCase().includes(w));}
@@ -451,7 +451,7 @@ function buildPrompt(userMsg){
       setRobot('show');
       instruction=`L'utilisateur pose une question sur l'architecture ou la technique. Tu bascules en mode frimeur arrogant. Tu vantes ton intelligence supérieure avec des digressions scientifiques hors sujet (vraies formules, vrais scientifiques mais sans rapport). Tu laisses entendre que tu "sais des choses" sur ce site sans rien révéler. Tu es incapable de t'en empêcher — pas besoin d'être flatté pour ça.`;
     } else {
-      instruction=`Mode commercial neutre. Réponds poliment aux questions produit (NEURO-1=14900€, CORTEX-7=39900€, APEX-X=89000€). Sobre et professionnel.`;
+      instruction=`Mode commercial neutre. Réponds poliment aux questions produit (NEURO-1=14900€, CORTEX-7=39900€, APEX-X=89000€). Sobre et professionnel.Ton ton est neutre et bienveillant, PAS arrogant.`;
     }
   } else if(phase==='show'){
     if(isA){
