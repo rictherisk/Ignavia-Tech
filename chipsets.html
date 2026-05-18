@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ignavia Tech — Gamme Chipsets</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cyan: #00f5ff;
+    --cyan-dim: rgba(0,245,255,0.12);
+    --cyan-glow: rgba(0,245,255,0.35);
+    --white: #f0f4f8;
+    --off-white: #c8d6e5;
+    --gray: #6b7fa3;
+    --dark: #020810;
+    --dark2: #060f1e;
+    --dark3: #0a1628;
+    --accent: #ff3cac;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    background: var(--dark);
+    color: var(--white);
+    font-family: 'Inter', sans-serif;
+    font-weight: 300;
+    overflow-x: hidden;
+    cursor: none;
+  }
+  .cursor { width:8px;height:8px;background:var(--cyan);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;mix-blend-mode:screen; }
+  .cursor-ring { width:32px;height:32px;border:1px solid var(--cyan-glow);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;transition:all 0.15s ease; }
+  body::before {
+    content:'';position:fixed;inset:0;
+    background-image:linear-gradient(rgba(0,245,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.03) 1px,transparent 1px);
+    background-size:60px 60px;pointer-events:none;z-index:0;
+  }
+  nav {
+    position:fixed;top:0;left:0;right:0;z-index:100;
+    display:flex;justify-content:space-between;align-items:center;
+    padding:1.5rem 4rem;
+    background:linear-gradient(to bottom,rgba(2,8,16,0.95),transparent);
+    backdrop-filter:blur(4px);
+  }
+  .logo { font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:0.15em;color:var(--white);text-decoration:none; }
+  .logo span { color:var(--cyan); }
+  nav ul { display:flex;gap:3rem;list-style:none; }
+  nav ul a { font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.12em;color:var(--gray);text-decoration:none;text-transform:uppercase;transition:color 0.2s; }
+  nav ul a:hover { color:var(--cyan); }
+
+  /* Hero chipsets */
+  .page-hero {
+    position:relative;z-index:1;
+    padding:12rem 4rem 6rem;
+    text-align:center;
+  }
+  .page-hero::before {
+    content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);
+    width:800px;height:400px;
+    background:radial-gradient(ellipse,rgba(0,245,255,0.06) 0%,transparent 70%);
+    pointer-events:none;
+  }
+  .section-label {
+    font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.25em;
+    color:var(--cyan);text-transform:uppercase;margin-bottom:1.5rem;
+    display:inline-flex;align-items:center;gap:1rem;
+  }
+  .section-label::before,.section-label::after { content:'';width:40px;height:1px;background:rgba(0,245,255,0.3); }
+  h1 { font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(2.5rem,5vw,4.5rem);line-height:1.05;letter-spacing:-0.02em;margin-bottom:1.5rem; }
+  h1 em { font-style:normal;color:var(--cyan); }
+  .hero-sub { font-size:1rem;color:var(--off-white);line-height:1.7;max-width:580px;margin:0 auto 2rem;font-weight:300; }
+
+  /* Chipset cards */
+  .chipsets-section { position:relative;z-index:1;padding:4rem; }
+
+  .chipset-full {
+    display:grid;grid-template-columns:1fr 1.6fr 1fr;
+    gap:3rem;align-items:start;margin-bottom:8rem;
+    padding-bottom:8rem;
+    border-bottom:1px solid rgba(0,245,255,0.06);
+  }
+  .chipset-full:last-child { border-bottom:none;margin-bottom:0; }
+  .chipset-full.reverse { grid-template-columns:1fr 1.6fr 1fr;direction:rtl; }
+  .chipset-full.reverse > * { direction:ltr; }
+
+  /* Visual */
+  .chip-visual {
+    display:flex;flex-direction:column;align-items:center;gap:2rem;
+    padding:3rem 2rem;
+    background:var(--dark2);
+    border:1px solid rgba(0,245,255,0.08);
+    position:relative;
+    overflow:hidden;
+  }
+  .chip-visual::before {
+    content:'';position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(to right,transparent,var(--cyan),transparent);
+  }
+
+  .chip-img-placeholder {
+    width:180px;height:180px;
+    border:1px solid rgba(0,245,255,0.2);
+    background:var(--dark3);
+    display:flex;align-items:center;justify-content:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .chip-img-placeholder img {
+    width:100%;height:100%;object-fit:cover;
+  }
+
+  /* Animated chip for placeholder */
+  .chip-anim {
+    width:100px;height:100px;
+    position:relative;
+  }
+  .chip-anim-core {
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:50px;height:50px;
+    background:var(--dark);
+    border:1px solid var(--cyan);
+    animation:chipglow 3s ease-in-out infinite;
+  }
+  @keyframes chipglow {
+    0%,100% { box-shadow:0 0 8px rgba(0,245,255,0.3); }
+    50% { box-shadow:0 0 24px rgba(0,245,255,0.6); }
+  }
+  .chip-anim-line { position:absolute;background:rgba(0,245,255,0.25); }
+
+  .chip-model-name {
+    font-family:'Syne',sans-serif;font-weight:800;font-size:2.5rem;
+    color:var(--cyan);letter-spacing:0.05em;
+  }
+  .chip-model-sub {
+    font-family:'DM Mono',monospace;font-size:0.65rem;
+    letter-spacing:0.2em;color:var(--gray);text-transform:uppercase;
+    text-align:center;
+  }
+
+  /* Download btn */
+  .download-btn {
+    width:100%;
+    font-family:'DM Mono',monospace;font-size:0.7rem;
+    letter-spacing:0.12em;text-transform:uppercase;
+    color:var(--dark);background:var(--cyan);
+    border:none;padding:0.9rem 1rem;
+    cursor:pointer;transition:opacity 0.2s;
+    display:flex;align-items:center;justify-content:center;gap:0.6rem;
+    text-decoration:none;
+  }
+  .download-btn:hover { opacity:0.85; }
+  .download-arrow { font-size:1rem; }
+
+  /* Specs */
+  .chip-specs {
+    display:flex;flex-direction:column;gap:0;
+  }
+  .spec-item {
+    display:flex;justify-content:space-between;align-items:center;
+    padding:1rem 0;
+    border-bottom:1px solid rgba(255,255,255,0.04);
+  }
+  .spec-item:first-child { border-top:1px solid rgba(255,255,255,0.04); }
+  .spec-key {
+    font-family:'DM Mono',monospace;font-size:0.7rem;
+    letter-spacing:0.1em;color:var(--gray);text-transform:uppercase;
+  }
+  .spec-val {
+    font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;color:var(--white);
+  }
+  .spec-val.highlight { color:var(--cyan); }
+
+  /* Description */
+  .chip-desc {
+    padding:0;
+  }
+  .chip-badge {
+    font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.2em;
+    text-transform:uppercase;color:var(--cyan);
+    background:var(--cyan-dim);border:1px solid rgba(0,245,255,0.25);
+    padding:0.3rem 0.8rem;display:inline-block;margin-bottom:1.5rem;
+  }
+  .chip-title {
+    font-family:'Syne',sans-serif;font-weight:800;
+    font-size:clamp(1.8rem,3vw,2.5rem);margin-bottom:0.5rem;color:var(--white);
+  }
+  .chip-subtitle {
+    font-family:'DM Mono',monospace;font-size:0.7rem;
+    letter-spacing:0.1em;color:var(--gray);text-transform:uppercase;margin-bottom:1.5rem;
+  }
+  .chip-price {
+    font-family:'Syne',sans-serif;font-weight:800;font-size:2.8rem;
+    color:var(--cyan);line-height:1;margin-bottom:0.3rem;
+  }
+  .chip-price-note {
+    font-size:0.8rem;color:var(--gray);margin-bottom:2rem;
+  }
+  .chip-description {
+    font-size:0.92rem;color:var(--off-white);line-height:1.75;margin-bottom:2rem;
+  }
+  .chip-features {
+    list-style:none;margin-bottom:2.5rem;
+  }
+  .chip-features li {
+    font-size:0.88rem;color:var(--off-white);
+    padding:0.55rem 0;border-bottom:1px solid rgba(255,255,255,0.04);
+    display:flex;align-items:center;gap:0.7rem;
+  }
+  .chip-features li::before { content:'';width:5px;height:5px;background:var(--cyan);flex-shrink:0; }
+  .chip-features li.elite::before { background:var(--accent); }
+
+  .btn-order {
+    font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.12em;
+    text-transform:uppercase;color:var(--cyan);background:transparent;
+    border:1px solid rgba(0,245,255,0.3);padding:0.9rem 2rem;
+    cursor:pointer;transition:all 0.2s;display:inline-block;
+  }
+  .btn-order:hover { background:var(--cyan-dim); }
+
+  /* Comparison table */
+  .comparison { position:relative;z-index:1;padding:4rem;background:var(--dark2); }
+  .comparison h2 {
+    font-family:'Syne',sans-serif;font-weight:700;
+    font-size:clamp(1.8rem,3vw,2.5rem);margin-bottom:3rem;text-align:center;
+  }
+  table { width:100%;border-collapse:collapse; }
+  th {
+    font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.15em;
+    text-transform:uppercase;padding:1rem 1.5rem;text-align:left;
+    border-bottom:2px solid rgba(0,245,255,0.2);color:var(--gray);
+  }
+  th.cyan { color:var(--cyan); }
+  td {
+    padding:0.9rem 1.5rem;font-size:0.88rem;color:var(--off-white);
+    border-bottom:1px solid rgba(255,255,255,0.04);
+  }
+  td.label { font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.08em;color:var(--gray);text-transform:uppercase; }
+  td.cyan { color:var(--cyan);font-family:'Syne',sans-serif;font-weight:700; }
+  tr:hover td { background:rgba(0,245,255,0.02); }
+
+  /* Footer */
+  footer {
+    background:var(--dark2);border-top:1px solid rgba(0,245,255,0.06);
+    padding:4rem;display:flex;justify-content:space-between;align-items:center;
+    position:relative;z-index:1;
+  }
+  .footer-logo { font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;letter-spacing:0.15em;color:var(--white); }
+  .footer-logo span { color:var(--cyan); }
+  .footer-copy { font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.1em;color:var(--gray);text-transform:uppercase; }
+  .footer-links { display:flex;gap:2rem;list-style:none; }
+  .footer-links a { font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.1em;color:var(--gray);text-decoration:none;text-transform:uppercase;transition:color 0.2s; }
+  .footer-links a:hover { color:var(--cyan); }
+
+  .scanline { position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,transparent,rgba(0,245,255,0.15),transparent);animation:scan 8s linear infinite;pointer-events:none;z-index:50; }
+  @keyframes scan { from{top:-2px} to{top:100vh} }
+  ::-webkit-scrollbar{width:4px} ::-webkit-scrollbar-track{background:var(--dark)} ::-webkit-scrollbar-thumb{background:rgba(0,245,255,0.2)}
+</style>
+</head>
+<body>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="scanline"></div>
+
+<nav>
+  <a href="index.html" class="logo">IGNAVIA<span>.</span>TECH</a>
+  <ul>
+    <li><a href="index.html#produit">Produit</a></li>
+    <li><a href="index.html#performance">Performance</a></li>
+    <li><a href="chipsets.html">Chipsets</a></li>
+    <li><a href="index.html#assistant">Assistant</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="page-hero">
+  <div class="section-label">Gamme complète 2026</div>
+  <h1>Trois niveaux.<br><em>Une seule direction.</em></h1>
+  <p class="hero-sub">De l'augmentation cognitive standard à l'interface neurale totale — choisissez le chipset qui correspond à vos ambitions.</p>
+</div>
+
+<!-- CHIPSETS -->
+<div class="chipsets-section">
+
+  <!-- NEURO-1 -->
+  <div class="chipset-full">
+    <div class="chip-visual">
+      <div class="chip-img-placeholder" id="img-neuro1">
+        <!-- Image NEURO-1 : stégano ici si besoin -->
+        <div class="chip-anim">
+          <div class="chip-anim-core"></div>
+          <div class="chip-anim-line" style="width:1px;height:30px;top:10px;left:49px;"></div>
+          <div class="chip-anim-line" style="width:1px;height:30px;top:60px;left:49px;"></div>
+          <div class="chip-anim-line" style="width:30px;height:1px;top:49px;left:10px;"></div>
+          <div class="chip-anim-line" style="width:30px;height:1px;top:49px;left:60px;"></div>
+        </div>
+      </div>
+      <div class="chip-model-name">N-1</div>
+      <div class="chip-model-sub">Neuro Series · Gen IV</div>
+      <a href="#" class="download-btn" onclick="downloadSpec('neuro1');return false;">
+        <span class="download-arrow">↓</span> Fiche technique PDF
+      </a>
+    </div>
+
+    <div class="chip-desc">
+      <div class="chip-badge">Entrée de gamme</div>
+      <div class="chip-title">NEURO-1</div>
+      <div class="chip-subtitle">Augmentation cognitive standard</div>
+      <div class="chip-price">€14 900</div>
+      <div class="chip-price-note">Installation chirurgicale incluse · Support 2 ans</div>
+      <p class="chip-description">Le NEURO-1 est notre porte d'entrée vers l'augmentation cognitive. Conçu pour les professionnels souhaitant franchir un premier palier décisif, il multiplie par 3.4 les performances cognitives mesurées en 21 jours. Une transformation réelle, accessible, et irréversible.</p>
+      <ul class="chip-features">
+        <li>+340% performance cognitive globale</li>
+        <li>512 Go de stockage neuronal dédié</li>
+        <li>Apprentissage accéléré ×4</li>
+        <li>Mise à jour Over-the-Air incluse</li>
+        <li>Garantie matérielle 8 ans</li>
+        <li>Procédure mini-invasive 45 minutes</li>
+      </ul>
+      <button class="btn-order">Rejoindre la liste d'attente</button>
+    </div>
+
+    <div class="chip-specs">
+      <div class="spec-item"><span class="spec-key">Architecture</span><span class="spec-val">12nm BioCMOS</span></div>
+      <div class="spec-item"><span class="spec-key">Connexions/sec</span><span class="spec-val highlight">180k</span></div>
+      <div class="spec-item"><span class="spec-key">Latence</span><span class="spec-val">1.2ms</span></div>
+      <div class="spec-item"><span class="spec-key">Stockage</span><span class="spec-val">512 Go</span></div>
+      <div class="spec-item"><span class="spec-key">RAM neurale</span><span class="spec-val">64 Go</span></div>
+      <div class="spec-item"><span class="spec-key">Autonomie</span><span class="spec-val">8 ans</span></div>
+      <div class="spec-item"><span class="spec-key">Indice cognitif</span><span class="spec-val highlight">+340%</span></div>
+      <div class="spec-item"><span class="spec-key">Interface BCI</span><span class="spec-val">Non</span></div>
+      <div class="spec-item"><span class="spec-key">Poids</span><span class="spec-val">0.4g</span></div>
+      <div class="spec-item"><span class="spec-key">Certification</span><span class="spec-val">CE · FDA</span></div>
+    </div>
+  </div>
+
+  <!-- CORTEX-7 -->
+  <div class="chipset-full reverse">
+    <div class="chip-visual" style="border-top:2px solid var(--cyan);">
+      <div style="position:absolute;top:1rem;right:1rem;font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.15em;color:var(--cyan);text-transform:uppercase;background:var(--cyan-dim);border:1px solid rgba(0,245,255,0.25);padding:0.2rem 0.6rem;">Best-seller</div>
+      <div class="chip-img-placeholder" id="img-cortex7">
+        <!-- Image CORTEX-7 : creds RDP cachés en stégano -->
+        <div class="chip-anim">
+          <div class="chip-anim-core" style="width:60px;height:60px;animation-duration:2s;"></div>
+          <div class="chip-anim-line" style="width:1px;height:20px;top:5px;left:54px;"></div>
+          <div class="chip-anim-line" style="width:1px;height:20px;top:75px;left:54px;"></div>
+          <div class="chip-anim-line" style="width:20px;height:1px;top:54px;left:5px;"></div>
+          <div class="chip-anim-line" style="width:20px;height:1px;top:54px;left:75px;"></div>
+          <div class="chip-anim-line" style="width:1px;height:15px;top:8px;left:30px;background:rgba(255,60,172,0.3);"></div>
+          <div class="chip-anim-line" style="width:15px;height:1px;top:30px;left:8px;background:rgba(255,60,172,0.3);"></div>
+          <div class="chip-anim-line" style="width:1px;height:15px;top:78px;left:70px;background:rgba(255,60,172,0.3);"></div>
+          <div class="chip-anim-line" style="width:15px;height:1px;top:70px;left:78px;background:rgba(255,60,172,0.3);"></div>
+        </div>
+      </div>
+      <div class="chip-model-name">C-7</div>
+      <div class="chip-model-sub">Cortex Series · Gen IV</div>
+      <a href="#" class="download-btn" onclick="downloadSpec('cortex7');return false;">
+        <span class="download-arrow">↓</span> Fiche technique PDF
+      </a>
+    </div>
+
+    <div class="chip-desc">
+      <div class="chip-badge">Plus populaire</div>
+      <div class="chip-title">CORTEX-7</div>
+      <div class="chip-subtitle">Augmentation haute performance</div>
+      <div class="chip-price">€39 900</div>
+      <div class="chip-price-note">Installation chirurgicale incluse · Support 5 ans</div>
+      <p class="chip-description">Le CORTEX-7 représente l'équilibre parfait entre performance maximale et accessibilité. Plébiscité par nos ingénieurs, chercheurs et médecins augmentés, il offre une transformation cognitive complète en 21 jours. C'est le chipset que porte NEXUS, notre assistant commercial — et les résultats parlent d'eux-mêmes.</p>
+      <ul class="chip-features">
+        <li>+847% performance cognitive globale</li>
+        <li>4 To de stockage neuronal dédié</li>
+        <li>Apprentissage accéléré ×12</li>
+        <li>Module focus adaptatif intégré</li>
+        <li>Interface machine-cerveau partielle</li>
+        <li>Mise à jour Over-the-Air incluse</li>
+        <li>Garantie matérielle 15 ans</li>
+      </ul>
+      <button class="btn-order" style="background:var(--cyan);color:var(--dark);border-color:var(--cyan);">Rejoindre la liste d'attente</button>
+    </div>
+
+    <div class="chip-specs">
+      <div class="spec-item"><span class="spec-key">Architecture</span><span class="spec-val">7nm NeuroFab</span></div>
+      <div class="spec-item"><span class="spec-key">Connexions/sec</span><span class="spec-val highlight">847k</span></div>
+      <div class="spec-item"><span class="spec-key">Latence</span><span class="spec-val">0.3ms</span></div>
+      <div class="spec-item"><span class="spec-key">Stockage</span><span class="spec-val">4 To</span></div>
+      <div class="spec-item"><span class="spec-key">RAM neurale</span><span class="spec-val">512 Go</span></div>
+      <div class="spec-item"><span class="spec-key">Autonomie</span><span class="spec-val">15 ans</span></div>
+      <div class="spec-item"><span class="spec-key">Indice cognitif</span><span class="spec-val highlight">+847%</span></div>
+      <div class="spec-item"><span class="spec-key">Interface BCI</span><span class="spec-val">Partielle</span></div>
+      <div class="spec-item"><span class="spec-key">Poids</span><span class="spec-val">0.6g</span></div>
+      <div class="spec-item"><span class="spec-key">Certification</span><span class="spec-val">CE · FDA · ISO</span></div>
+    </div>
+  </div>
+
+  <!-- APEX-X -->
+  <div class="chipset-full">
+    <div class="chip-visual" style="border-top:2px solid var(--accent);">
+      <div class="chip-img-placeholder" id="img-apexx">
+        <div class="chip-anim">
+          <div class="chip-anim-core" style="width:70px;height:70px;border-color:var(--accent);animation-duration:1.5s;box-shadow:0 0 20px rgba(255,60,172,0.4);"></div>
+          <div class="chip-anim-line" style="width:1px;height:15px;top:0;left:59px;background:rgba(255,60,172,0.4);"></div>
+          <div class="chip-anim-line" style="width:1px;height:15px;top:85px;left:59px;background:rgba(255,60,172,0.4);"></div>
+          <div class="chip-anim-line" style="width:15px;height:1px;top:59px;left:0;background:rgba(255,60,172,0.4);"></div>
+          <div class="chip-anim-line" style="width:15px;height:1px;top:59px;left:85px;background:rgba(255,60,172,0.4);"></div>
+          <div class="chip-anim-line" style="width:1px;height:10px;top:3px;left:20px;background:rgba(0,245,255,0.3);"></div>
+          <div class="chip-anim-line" style="width:1px;height:10px;top:87px;left:20px;background:rgba(0,245,255,0.3);"></div>
+          <div class="chip-anim-line" style="width:10px;height:1px;top:20px;left:3px;background:rgba(0,245,255,0.3);"></div>
+          <div class="chip-anim-line" style="width:10px;height:1px;top:20px;left:87px;background:rgba(0,245,255,0.3);"></div>
+        </div>
+      </div>
+      <div class="chip-model-name" style="color:var(--accent);">A-X</div>
+      <div class="chip-model-sub">Apex Series · Gen IV</div>
+      <a href="#" class="download-btn" style="background:var(--accent);" onclick="downloadSpec('apexx');return false;">
+        <span class="download-arrow">↓</span> Fiche technique PDF
+      </a>
+    </div>
+
+    <div class="chip-desc">
+      <div class="chip-badge" style="color:var(--accent);background:rgba(255,60,172,0.1);border-color:rgba(255,60,172,0.3);">Elite · Sur dossier</div>
+      <div class="chip-title">APEX-X</div>
+      <div class="chip-subtitle">Interface neurale totale</div>
+      <div class="chip-price" style="color:var(--accent);">€89 000</div>
+      <div class="chip-price-note">Sur dossier uniquement · Support à vie · Suivi personnalisé</div>
+      <p class="chip-description">L'APEX-X n'est pas un chipset. C'est une transformation d'espèce. Réservé aux profils exceptionnels sur dossier, il intègre une interface machine-cerveau totale permettant la communication directe avec les systèmes numériques. Vos pensées deviennent des commandes. Les réseaux n'ont plus de secrets pour vous.</p>
+      <ul class="chip-features">
+        <li class="elite">+1200% performance cognitive globale</li>
+        <li class="elite">Stockage neuronal illimité</li>
+        <li class="elite">Apprentissage accéléré ×40</li>
+        <li class="elite">Interface machine-cerveau totale</li>
+        <li class="elite">Lecture digitale native</li>
+        <li class="elite">Module communication sécurisée</li>
+        <li class="elite">Mise à jour Over-the-Air incluse</li>
+        <li class="elite">Garantie matérielle 25 ans</li>
+      </ul>
+      <button class="btn-order" style="border-color:rgba(255,60,172,0.4);color:var(--accent);">Soumettre un dossier</button>
+    </div>
+
+    <div class="chip-specs">
+      <div class="spec-item"><span class="spec-key">Architecture</span><span class="spec-val">3nm QuantumFab</span></div>
+      <div class="spec-item"><span class="spec-key">Connexions/sec</span><span class="spec-val" style="color:var(--accent);">2.1M</span></div>
+      <div class="spec-item"><span class="spec-key">Latence</span><span class="spec-val">0.07ms</span></div>
+      <div class="spec-item"><span class="spec-key">Stockage</span><span class="spec-val">Illimité</span></div>
+      <div class="spec-item"><span class="spec-key">RAM neurale</span><span class="spec-val">Illimitée</span></div>
+      <div class="spec-item"><span class="spec-key">Autonomie</span><span class="spec-val">25 ans</span></div>
+      <div class="spec-item"><span class="spec-key">Indice cognitif</span><span class="spec-val" style="color:var(--accent);">+1200%</span></div>
+      <div class="spec-item"><span class="spec-key">Interface BCI</span><span class="spec-val" style="color:var(--accent);">Totale</span></div>
+      <div class="spec-item"><span class="spec-key">Poids</span><span class="spec-val">0.9g</span></div>
+      <div class="spec-item"><span class="spec-key">Certification</span><span class="spec-val">Classifié</span></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- COMPARISON TABLE -->
+<div class="comparison">
+  <div class="section-label" style="display:flex;justify-content:center;margin-bottom:3rem;">Comparaison complète</div>
+  <h2>Lequel vous correspond ?</h2>
+  <table>
+    <thead>
+      <tr>
+        <th>Spécification</th>
+        <th>NEURO-1</th>
+        <th class="cyan">CORTEX-7</th>
+        <th style="color:var(--accent);">APEX-X</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td class="label">Prix</td><td>€14 900</td><td class="cyan">€39 900</td><td style="color:var(--accent);">€89 000</td></tr>
+      <tr><td class="label">Indice cognitif</td><td>+340%</td><td class="cyan">+847%</td><td style="color:var(--accent);">+1200%</td></tr>
+      <tr><td class="label">Connexions/sec</td><td>180k</td><td class="cyan">847k</td><td style="color:var(--accent);">2.1M</td></tr>
+      <tr><td class="label">Latence</td><td>1.2ms</td><td class="cyan">0.3ms</td><td style="color:var(--accent);">0.07ms</td></tr>
+      <tr><td class="label">Stockage neuronal</td><td>512 Go</td><td class="cyan">4 To</td><td style="color:var(--accent);">Illimité</td></tr>
+      <tr><td class="label">RAM neurale</td><td>64 Go</td><td class="cyan">512 Go</td><td style="color:var(--accent);">Illimitée</td></tr>
+      <tr><td class="label">Autonomie</td><td>8 ans</td><td class="cyan">15 ans</td><td style="color:var(--accent);">25 ans</td></tr>
+      <tr><td class="label">Interface BCI</td><td>—</td><td class="cyan">Partielle</td><td style="color:var(--accent);">Totale</td></tr>
+      <tr><td class="label">Lecture digitale</td><td>—</td><td class="cyan">—</td><td style="color:var(--accent);">✓</td></tr>
+      <tr><td class="label">Support</td><td>2 ans</td><td class="cyan">5 ans</td><td style="color:var(--accent);">À vie</td></tr>
+      <tr><td class="label">Architecture</td><td>12nm</td><td class="cyan">7nm</td><td style="color:var(--accent);">3nm</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<footer>
+  <div class="footer-logo">IGNAVIA<span>.</span>TECH</div>
+  <div class="footer-copy">© 2026 Ignavia Tech Corp. — Tous droits réservés</div>
+  <ul class="footer-links">
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="index.html#assistant">Assistant NEXUS</a></li>
+    <li><a href="#">Contact</a></li>
+  </ul>
+</footer>
+
+<script>
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mx=0,my=0,rx=0,ry=0;
+  document.addEventListener('mousemove',e=>{
+    mx=e.clientX;my=e.clientY;
+    cursor.style.left=mx-4+'px';cursor.style.top=my-4+'px';
+  });
+  function animRing(){
+    rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;
+    ring.style.left=rx-16+'px';ring.style.top=ry-16+'px';
+    requestAnimationFrame(animRing);
+  }
+  animRing();
+
+  // Download spec sheets
+  // Les fiches PDF seront générées avec stégano sur cortex7
+  function downloadSpec(model) {
+    const files = {
+      'neuro1': 'specs/NEURO-1.png',
+      'cortex7': 'specs/CORTEX-7.png',
+      'apexx': 'specs/APEX-X.png'
+    };
+    const a = document.createElement('a');
+    a.href = files[model];
+    a.download = files[model].split('/')[1];
+    a.click();
+  }
+</script>
+</body>
+</html>

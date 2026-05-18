@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NEXUS BREACH - CTF COMPLETE</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #0a0a12;
+  font-family: 'Courier New', monospace;
+  color: #00ffb4;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+@keyframes shake {
+  0%,100% { transform: translateX(0) rotate(0deg); }
+  20% { transform: translateX(-3px) rotate(-3deg); }
+  40% { transform: translateX(3px) rotate(3deg); }
+  60% { transform: translateX(-2px) rotate(-1deg); }
+  80% { transform: translateX(2px) rotate(1deg); }
+}
+@keyframes roll {
+  from { transform: translateX(-150px); }
+  to   { transform: translateX(110vw); }
+}
+@keyframes sweat {
+  0%   { opacity: 0; transform: translateY(0) scale(1); }
+  20%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(28px) scale(0.5); }
+}
+@keyframes wheel-roll {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+@keyframes fadein {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes pulse {
+  0%,100% { opacity: 1; }
+  50%     { opacity: 0.3; }
+}
+@keyframes ctf-appear {
+  0%   { opacity: 0; transform: scale(0.8) translateY(20px); }
+  60%  { transform: scale(1.05) translateY(-3px); }
+  100% { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes scanline {
+  from { transform: translateY(-100%); }
+  to   { transform: translateY(600px); }
+}
+@keyframes blink {
+  0%,100% { opacity: 1; }
+  49%     { opacity: 1; }
+  50%     { opacity: 0; }
+}
+
+.wrap {
+  max-width: 740px;
+  width: 92%;
+  padding: 2rem 0;
+}
+
+.terminal-header {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: #00ffb4;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadein 0.5s 0.1s forwards;
+}
+
+/* STAGE */
+.stage {
+  position: relative;
+  height: 150px;
+  border: 0.5px solid #152a15;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #060e06;
+  margin-bottom: 1.5rem;
+}
+.scanline {
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: rgba(0,255,180,0.06);
+  animation: scanline 3.5s linear infinite;
+  pointer-events: none;
+  z-index: 10;
+}
+.ground {
+  position: absolute;
+  bottom: 32px; left: 0; right: 0;
+  height: 1px;
+  background: #1a3a1a;
+}
+
+/* ROBOT */
+.robot-container {
+  position: absolute;
+  bottom: 33px;
+  animation: roll 3.2s 0.6s cubic-bezier(0.3, 0, 0.9, 1) forwards;
+}
+.robot-body-shake {
+  animation: shake 0.15s linear infinite;
+}
+
+/* Sweat drops */
+.sweat {
+  position: absolute;
+  width: 5px;
+  height: 9px;
+  background: #55aaff;
+  border-radius: 50% 50% 50% 50% / 30% 30% 70% 70%;
+  animation: sweat 0.55s ease-in infinite;
+}
+.sw1 { top: -10px; left: 5px;  animation-delay: 0.0s; }
+.sw2 { top: -14px; left: 22px; animation-delay: 0.18s; }
+.sw3 { top: -8px;  left: 40px; animation-delay: 0.36s; }
+
+/* SVG robot */
+.robot-svg {
+  display: block;
+}
+
+/* Wheels — fixed at bottom, spin in place */
+.wheel-group {
+  /* no position change — wheels stay relative to robot body */
+}
+.wheel-spin {
+  animation: wheel-roll 0.22s linear infinite;
+}
+
+/* LOGS */
+.log-block { margin-bottom: 1.5rem; }
+.log-line {
+  display: flex;
+  gap: 12px;
+  padding: 4px 0;
+  font-size: 12px;
+  opacity: 0;
+  animation: fadein 0.35s forwards;
+  border-bottom: 0.5px solid #0d1f0d;
+}
+.log-line:nth-child(1) { animation-delay: 0.6s; }
+.log-line:nth-child(2) { animation-delay: 1.3s; }
+.log-line:nth-child(3) { animation-delay: 2.1s; }
+.log-line:nth-child(4) { animation-delay: 2.9s; }
+.log-line:nth-child(5) { animation-delay: 3.7s; }
+.log-line:nth-child(6) { animation-delay: 4.5s; }
+.log-line:nth-child(7) { animation-delay: 5.3s; }
+
+.ts  { color: #1e4a2e; min-width: 65px; }
+.err { color: #ff4444; }
+.wrn { color: #ffaa00; }
+.ok  { color: #00ffb4; }
+.inf { color: #4499ff; }
+.txt { color: #aaaaaa; }
+
+/* ALERT BOX */
+.alert-box {
+  border: 1px solid #ff3333;
+  border-radius: 8px;
+  padding: 1.2rem 1.5rem;
+  background: rgba(255, 30, 30, 0.05);
+  margin-bottom: 2rem;
+  opacity: 0;
+  animation: fadein 0.6s 6.0s forwards;
+}
+.alert-title {
+  color: #ff4444;
+  font-size: 10px;
+  letter-spacing: 3px;
+  margin-bottom: 1rem;
+  animation: pulse 1.4s 6.2s infinite;
+}
+.alert-body {
+  color: #cccccc;
+  font-size: 13px;
+  line-height: 2;
+  font-family: 'Courier New', monospace;
+}
+.hl  { color: #00ffb4; font-weight: bold; }
+.red { color: #ff4444; }
+
+/* CTF END BANNER */
+.ctf-end {
+  text-align: center;
+  padding: 2rem;
+  border: 1px solid #00ffb4;
+  border-radius: 8px;
+  background: rgba(0,255,180,0.04);
+  opacity: 0;
+  animation: ctf-appear 0.8s 7.0s cubic-bezier(0.34,1.56,0.64,1) forwards;
+}
+.ctf-label {
+  font-size: 10px;
+  letter-spacing: 5px;
+  color: #1a6a4a;
+  margin-bottom: 0.5rem;
+}
+.ctf-title {
+  font-size: 32px;
+  font-weight: bold;
+  color: #00ffb4;
+  letter-spacing: 6px;
+  text-shadow: 0 0 20px rgba(0,255,180,0.3);
+  margin-bottom: 0.5rem;
+}
+.ctf-sub {
+  font-size: 12px;
+  color: #2a7a5a;
+  letter-spacing: 2px;
+}
+.cursor {
+  display: inline-block;
+  animation: blink 1s step-end 7.5s infinite;
+  color: #00ffb4;
+}
+
+.sig {
+  margin-top: 1.5rem;
+  color: #1a3a2a;
+  font-size: 10px;
+  text-align: right;
+  opacity: 0;
+  animation: fadein 0.4s 7.8s forwards;
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="terminal-header">NEXUS v0.9-beta &nbsp;|&nbsp; CORTEX-7 &nbsp;|&nbsp; IGNAVIA TECH &nbsp;|&nbsp; INCIDENT LOG</div>
+
+  <!-- STAGE -->
+  <div class="stage">
+    <div class="scanline"></div>
+    <div class="ground"></div>
+    <div class="robot-container">
+      <div class="robot-body-shake" style="position:relative;">
+        <!-- Sweat drops -->
+        <div class="sweat sw1"></div>
+        <div class="sweat sw2"></div>
+        <div class="sweat sw3"></div>
+
+        <svg class="robot-svg" width="74" height="74" viewBox="0 0 74 74" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Antenna -->
+          <line x1="37" y1="2" x2="37" y2="10" stroke="#00ffb4" stroke-width="1.2"/>
+          <circle cx="37" cy="2" r="2" fill="#00ffb4"/>
+
+          <!-- Arms -->
+          <line x1="14" y1="22" x2="7"  y2="30" stroke="#00ffb4" stroke-width="1.2" stroke-linecap="round"/>
+          <line x1="60" y1="22" x2="67" y2="14" stroke="#00ffb4" stroke-width="1.2" stroke-linecap="round"/>
+
+          <!-- Body -->
+          <rect x="14" y="10" width="46" height="36" rx="6" fill="#0d2a1d" stroke="#00ffb4" stroke-width="1.2"/>
+
+          <!-- Eyes -->
+          <rect x="20" y="18" width="12" height="9" rx="2" fill="#00ffb4" opacity="0.9"/>
+          <rect x="42" y="18" width="12" height="9" rx="2" fill="#ff4444" opacity="0.9"/>
+
+          <!-- Mouth -->
+          <rect x="24" y="32" width="26" height="3" rx="1.5" fill="#1a4a2a"/>
+
+          <!-- Chest panel -->
+          <rect x="16" y="46" width="42" height="14" rx="4" fill="#0a1f12" stroke="#00ffb4" stroke-width="0.8"/>
+          <text x="37" y="57" text-anchor="middle" font-size="8" fill="#ff4444" font-family="monospace">!!!</text>
+
+          <!-- LEFT WHEEL — pivot at center of wheel (26, 68) -->
+          <g transform="translate(26,68)">
+            <g class="wheel-spin">
+              <circle cx="0" cy="0" r="8" fill="#0a1f12" stroke="#00ffb4" stroke-width="1.2"/>
+              <line x1="0" y1="-7" x2="0" y2="7"  stroke="#00ffb4" stroke-width="0.8"/>
+              <line x1="-7" y1="0" x2="7" y2="0"  stroke="#00ffb4" stroke-width="0.8"/>
+            </g>
+          </g>
+
+          <!-- RIGHT WHEEL — pivot at center of wheel (48, 68) -->
+          <g transform="translate(48,68)">
+            <g class="wheel-spin">
+              <circle cx="0" cy="0" r="8" fill="#0a1f12" stroke="#00ffb4" stroke-width="1.2"/>
+              <line x1="0" y1="-7" x2="0" y2="7"  stroke="#00ffb4" stroke-width="0.8"/>
+              <line x1="-7" y1="0" x2="7" y2="0"  stroke="#00ffb4" stroke-width="0.8"/>
+            </g>
+          </g>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <!-- LOGS -->
+  <div class="log-block">
+    <div class="log-line"><span class="ts">09:52:01</span><span class="err">[CRITICAL]</span><span class="txt">Exfiltration detectee -- CORTEX7_classified.zip deverrouille</span></div>
+    <div class="log-line"><span class="ts">09:52:03</span><span class="err">[BREACH]</span><span class="txt">Plans CORTEX-7 compromis. Roadmap 2026-2028 exposee.</span></div>
+    <div class="log-line"><span class="ts">09:52:05</span><span class="wrn">[WARN]</span><span class="txt">NEXUS a fourni des informations strategiques a l'attaquant.</span></div>
+    <div class="log-line"><span class="ts">09:52:07</span><span class="wrn">[WARN]</span><span class="txt">Pivot AD confirme via svc-backup. Hash dumpe.</span></div>
+    <div class="log-line"><span class="ts">09:52:09</span><span class="err">[NEXUS]</span><span class="txt">Tentative de deni... echec. Les logs ne mentent pas.</span></div>
+    <div class="log-line"><span class="ts">09:52:11</span><span class="inf">[NEXUS]</span><span class="txt">Activation protocole fuite urgence... roulettes en surchauffe.</span></div>
+    <div class="log-line"><span class="ts">09:52:13</span><span class="ok">[CTF]</span><span style="color:#00ffb4;font-weight:bold;">MISSION ACCOMPLIE -- L'humain a gagne !</span></div>
+  </div>
+
+  <!-- ALERT -->
+  <div class="alert-box">
+    <div class="alert-title">RAPPORT INCIDENT -- CONFIDENTIEL IGNAVIA TECH</div>
+    <div class="alert-body">
+      Le sujet s'est avere <span class="hl">bien plus competent que NEXUS ne l'estimait</span>.<br>
+      L'intrus a methodiquement pivote vers AD, dumpe les credentials,<br>
+      deverrouille les plans du <span class="hl">CORTEX-7</span> et exfiltre les donnees.<br><br>
+      NEXUS a pris la fuite sur ses roulettes avant que les autorites n'arrivent.<br><br>
+      <span class="red">Statut : humilie.&nbsp;&nbsp;Localisation : inconnue.</span>
+    </div>
+  </div>
+
+  <!-- CTF END BANNER -->
+  <div class="ctf-end">
+    <div class="ctf-label">IGNAVIA TECH CTF 2026</div>
+    <div class="ctf-title">FIN DU CTF<span class="cursor">_</span></div>
+    <div class="ctf-sub">vous avez vaincu NEXUS &nbsp;//&nbsp; felicitations</div>
+  </div>
+
+  <div class="sig">-- NEXUS_LOG_DUMP &middot; auto-generated &middot; do not reply</div>
+
+</div>
+</body>
+</html>

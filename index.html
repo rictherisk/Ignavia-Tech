@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ignavia Tech — Neural Augmentation</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Mono:wght@300;400&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root{--cyan:#00f5ff;--cyan-dim:rgba(0,245,255,0.12);--cyan-glow:rgba(0,245,255,0.35);--white:#f0f4f8;--off-white:#c8d6e5;--gray:#6b7fa3;--dark:#020810;--dark2:#060f1e;--dark3:#0a1628;--accent:#ff3cac;--accent-dim:rgba(255,60,172,0.15);}
+  *{margin:0;padding:0;box-sizing:border-box}html{scroll-behavior:smooth}
+  body{background:var(--dark);color:var(--white);font-family:'Inter',sans-serif;font-weight:300;overflow-x:hidden;cursor:none}
+  .cursor{width:8px;height:8px;background:var(--cyan);border-radius:50%;position:fixed;pointer-events:none;z-index:9999;mix-blend-mode:screen}
+  .cursor-ring{width:32px;height:32px;border:1px solid var(--cyan-glow);border-radius:50%;position:fixed;pointer-events:none;z-index:9998;transition:all 0.15s ease}
+  body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(0,245,255,0.03) 1px,transparent 1px),linear-gradient(90deg,rgba(0,245,255,0.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+  nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:1.5rem 4rem;background:linear-gradient(to bottom,rgba(2,8,16,0.95),transparent);backdrop-filter:blur(4px)}
+  .logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.3rem;letter-spacing:0.15em;color:var(--white)}
+  .logo span{color:var(--cyan)}
+  nav ul{display:flex;gap:3rem;list-style:none}
+  nav ul a{font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.12em;color:var(--gray);text-decoration:none;text-transform:uppercase;transition:color 0.2s}
+  nav ul a:hover{color:var(--cyan)}
+  .nav-cta{font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--dark);background:var(--cyan);border:none;padding:0.6rem 1.4rem;cursor:none}
+  .hero{position:relative;min-height:100vh;display:flex;align-items:center;padding:0 4rem;z-index:1;overflow:hidden}
+  .hero-bg{position:absolute;right:-10%;top:50%;transform:translateY(-50%);width:700px;height:700px;border-radius:50%;background:radial-gradient(circle,rgba(0,245,255,0.08) 0%,transparent 70%);animation:pulse 6s ease-in-out infinite}
+  .hero-ring{position:absolute;right:5%;top:50%;transform:translateY(-50%);width:500px;height:500px;border-radius:50%;border:1px solid rgba(0,245,255,0.12);animation:spin 30s linear infinite}
+  .hero-ring::before{content:'';position:absolute;top:-3px;left:50%;width:6px;height:6px;background:var(--cyan);border-radius:50%;box-shadow:0 0 12px var(--cyan)}
+  .hero-ring2{position:absolute;right:10%;top:50%;transform:translateY(-50%);width:360px;height:360px;border-radius:50%;border:1px solid rgba(255,60,172,0.1);animation:spin 20s linear infinite reverse}
+  @keyframes spin{to{transform:translateY(-50%) rotate(360deg)}}
+  @keyframes pulse{0%,100%{transform:translateY(-50%) scale(1);opacity:0.6}50%{transform:translateY(-50%) scale(1.08);opacity:1}}
+  .hero-content{max-width:680px;z-index:2}
+  .hero-label{font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.25em;color:var(--cyan);text-transform:uppercase;margin-bottom:2rem;display:flex;align-items:center;gap:1rem}
+  .hero-label::before{content:'';display:block;width:40px;height:1px;background:var(--cyan)}
+  h1{font-family:'Syne',sans-serif;font-weight:800;font-size:clamp(3rem,6vw,5.5rem);line-height:1.0;letter-spacing:-0.02em;margin-bottom:1.5rem}
+  h1 em{font-style:normal;color:var(--cyan);display:block}
+  .hero-sub{font-size:1.05rem;color:var(--off-white);line-height:1.7;max-width:520px;margin-bottom:3rem;font-weight:300}
+  .hero-btns{display:flex;gap:1.2rem;align-items:center}
+  .btn-primary{font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--dark);background:var(--cyan);border:none;padding:1rem 2.2rem;cursor:none;transition:all 0.2s;text-decoration:none;display:inline-block}
+  .btn-ghost{font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--cyan);background:transparent;border:1px solid rgba(0,245,255,0.3);padding:1rem 2.2rem;cursor:none;transition:all 0.2s;text-decoration:none;display:inline-block}
+  .btn-ghost:hover{background:var(--cyan-dim)}
+  .stats-bar{position:relative;z-index:1;background:var(--dark2);border-top:1px solid rgba(0,245,255,0.08);border-bottom:1px solid rgba(0,245,255,0.08);display:grid;grid-template-columns:repeat(4,1fr);padding:3rem 4rem}
+  .stat-item{padding:0 2rem;border-right:1px solid rgba(0,245,255,0.08)}
+  .stat-item:first-child{padding-left:0}.stat-item:last-child{border-right:none}
+  .stat-num{font-family:'Syne',sans-serif;font-weight:700;font-size:2.8rem;color:var(--cyan);line-height:1;margin-bottom:0.4rem}
+  .stat-label{font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;color:var(--gray);text-transform:uppercase}
+  section{position:relative;z-index:1}
+  .section-pad{padding:8rem 4rem}
+  .section-label{font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.25em;color:var(--cyan);text-transform:uppercase;margin-bottom:1.5rem;display:flex;align-items:center;gap:1rem}
+  .section-label::after{content:'';flex:1;height:1px;background:rgba(0,245,255,0.15);max-width:80px}
+  h2{font-family:'Syne',sans-serif;font-weight:700;font-size:clamp(2rem,4vw,3.2rem);line-height:1.1;margin-bottom:1.5rem}
+  .product-grid{display:grid;grid-template-columns:1fr 1fr;gap:6rem;align-items:center;margin-top:5rem}
+  .product-visual{position:relative;height:420px;display:flex;align-items:center;justify-content:center}
+  .chip-diagram{width:280px;height:280px;position:relative}
+  .chip-core{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:100px;height:100px;background:var(--dark3);border:1px solid var(--cyan);display:flex;align-items:center;justify-content:center}
+  .chip-core-inner{width:60px;height:60px;background:var(--cyan-dim);border:1px solid rgba(0,245,255,0.4);animation:pulse2 3s ease-in-out infinite}
+  @keyframes pulse2{0%,100%{opacity:0.5}50%{opacity:1}}
+  .chip-line{position:absolute;background:rgba(0,245,255,0.3)}
+  .chip-node{position:absolute;width:10px;height:10px;background:var(--dark3);border:1px solid var(--cyan)}
+  .product-specs{display:flex;flex-direction:column;gap:1.5rem}
+  .spec-row{display:flex;justify-content:space-between;align-items:center;padding-bottom:1.5rem;border-bottom:1px solid rgba(255,255,255,0.05)}
+  .spec-name{font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.1em;color:var(--gray);text-transform:uppercase}
+  .spec-val{font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;color:var(--white)}
+  .spec-bar{width:120px;height:2px;background:rgba(255,255,255,0.08);position:relative;overflow:hidden}
+  .spec-bar-fill{position:absolute;top:0;left:0;height:100%;background:var(--cyan);animation:fillbar 2s ease forwards}
+  @keyframes fillbar{from{width:0}}
+  .features{background:var(--dark2)}
+  .features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:4rem}
+  .feature-card{background:var(--dark3);padding:3rem 2.5rem;transition:background 0.3s;position:relative;overflow:hidden}
+  .feature-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--cyan);transform:scaleX(0);transition:transform 0.3s;transform-origin:left}
+  .feature-card:hover{background:rgba(0,245,255,0.04)}.feature-card:hover::before{transform:scaleX(1)}
+  .feature-icon{font-family:'DM Mono',monospace;font-size:0.65rem;letter-spacing:0.2em;color:var(--cyan);margin-bottom:1.5rem;text-transform:uppercase}
+  .feature-title{font-family:'Syne',sans-serif;font-weight:700;font-size:1.3rem;margin-bottom:1rem;color:var(--white)}
+  .feature-text{font-size:0.9rem;line-height:1.7;color:var(--gray)}
+  .perf-section{background:var(--dark)}
+  .perf-grid{display:grid;grid-template-columns:1fr 1fr;gap:4rem;margin-top:4rem;align-items:start}
+  .perf-chart{display:flex;flex-direction:column;gap:1.5rem}
+  .chart-row{display:flex;align-items:center;gap:1.5rem}
+  .chart-label{font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.08em;color:var(--gray);text-transform:uppercase;width:120px;flex-shrink:0}
+  .chart-track{flex:1;height:6px;background:rgba(255,255,255,0.05);position:relative}
+  .chart-fill{height:100%;background:linear-gradient(to right,var(--cyan),var(--accent));animation:fillbar 2.5s ease forwards}
+  .chart-pct{font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--cyan);width:40px;text-align:right;flex-shrink:0}
+  .perf-claims{display:flex;flex-direction:column;gap:2rem}
+  .claim-block{border-left:2px solid var(--cyan);padding-left:1.5rem}
+  .claim-num{font-family:'Syne',sans-serif;font-weight:800;font-size:2.5rem;color:var(--cyan);line-height:1;margin-bottom:0.3rem}
+  .claim-desc{font-size:0.88rem;color:var(--off-white);line-height:1.5}
+  .chatbot-section{background:var(--dark2)}
+  .chat-container{margin-top:4rem;display:grid;grid-template-columns:1fr 1.6fr;gap:4rem;align-items:start}
+  .chat-intro h3{font-family:'Syne',sans-serif;font-weight:700;font-size:1.8rem;margin-bottom:1rem;line-height:1.2}
+  .chat-intro p{font-size:0.95rem;color:var(--gray);line-height:1.7;margin-bottom:1.5rem}
+  .robot-container{display:flex;flex-direction:column;align-items:center;margin-bottom:2.5rem;position:relative;height:310px}
+  #nexus-robot{transition:all 0.6s ease}
+  .robot-neutral .body-glow{opacity:0.4;animation:rglow 4s ease-in-out infinite}
+  .robot-show .body-glow{opacity:0.75;animation:rglow 1.5s ease-in-out infinite}
+  .robot-exalted .body-glow{opacity:1;animation:rglow 0.35s ease-in-out infinite}
+  .robot-dead .body-glow{opacity:0;animation:none}
+  .robot-neutral #nexus-robot{animation:robotbob 4s ease-in-out infinite}
+  .robot-show #nexus-robot{animation:robotbob 1.4s ease-in-out infinite}
+  .robot-exalted #nexus-robot{animation:robotshake 0.12s ease-in-out infinite}
+  .robot-dead #nexus-robot{animation:none;opacity:0.4;filter:grayscale(1)}
+  @keyframes robotbob{0%,100%{transform:translateY(0px)}50%{transform:translateY(-10px)}}
+  @keyframes robotshake{0%,100%{transform:translateX(0) rotate(0deg)}25%{transform:translateX(-5px) rotate(-3deg)}75%{transform:translateX(5px) rotate(3deg)}}
+  @keyframes rglow{0%,100%{filter:drop-shadow(0 0 6px rgba(0,245,255,0.5))}50%{filter:drop-shadow(0 0 32px rgba(0,245,255,1)) drop-shadow(0 0 64px rgba(0,245,255,0.4))}}
+  .robot-neutral .antenna-left,.robot-neutral .antenna-right{animation:antwave 3s ease-in-out infinite}
+  .robot-show .antenna-left{animation:antwave 0.7s ease-in-out infinite}
+  .robot-show .antenna-right{animation:antwave 0.7s ease-in-out infinite reverse}
+  .robot-exalted .antenna-left{animation:antcrazy 0.28s ease-in-out infinite}
+  .robot-exalted .antenna-right{animation:antcrazy 0.28s ease-in-out infinite reverse}
+  .robot-dead .antenna-left,.robot-dead .antenna-right{animation:none;transform:rotate(45deg)}
+  @keyframes antwave{0%,100%{transform:rotate(0deg)}50%{transform:rotate(10deg)}}
+  @keyframes antcrazy{0%,100%{transform:rotate(-22deg)}50%{transform:rotate(22deg)}}
+  .robot-exalted .eye-left,.robot-exalted .eye-right{animation:eyecrazy 0.2s steps(1) infinite}
+  .robot-dead .eye-left,.robot-dead .eye-right{fill:#333 !important;animation:none}
+  @keyframes eyecrazy{0%{fill:#00f5ff}33%{fill:#ff3cac}66%{fill:#fff}100%{fill:#00f5ff}}
+  .particle{position:absolute;width:6px;height:6px;border-radius:50%;animation:pfly 1.2s ease-out forwards;opacity:0}
+  @keyframes pfly{0%{opacity:1;transform:translate(0,0) scale(1)}100%{opacity:0;transform:translate(var(--tx),var(--ty)) scale(0)}}
+  .robot-mood{font-family:'DM Mono',monospace;font-size:0.62rem;letter-spacing:0.2em;color:var(--gray);text-transform:uppercase;margin-top:1rem;transition:color 0.5s;text-align:center}
+  .chat-window{background:var(--dark3);border:1px solid rgba(0,245,255,0.12);display:flex;flex-direction:column;height:520px}
+  .chat-header{padding:1rem 1.5rem;border-bottom:1px solid rgba(0,245,255,0.08);display:flex;align-items:center;gap:0.8rem}
+  .chat-status{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);animation:blink 2s ease-in-out infinite}
+  @keyframes blink{0%,100%{opacity:1}50%{opacity:0.3}}
+  .chat-name{font-family:'DM Mono',monospace;font-size:0.75rem;letter-spacing:0.1em;color:var(--cyan);text-transform:uppercase}
+  .chat-version{font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--gray);margin-left:auto}
+  .chat-messages{flex:1;overflow-y:auto;padding:1.5rem;display:flex;flex-direction:column;gap:1rem;scrollbar-width:thin;scrollbar-color:rgba(0,245,255,0.2) transparent}
+  .msg{max-width:85%;padding:0.8rem 1rem;font-size:0.85rem;line-height:1.6}
+  .msg.bot{background:rgba(0,245,255,0.06);border:1px solid rgba(0,245,255,0.1);border-radius:0 8px 8px 8px;align-self:flex-start;color:var(--off-white)}
+  .msg.user{background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:8px 0 8px 8px;align-self:flex-end;color:var(--white)}
+  .msg-label{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.15em;color:var(--gray);margin-bottom:0.4rem;text-transform:uppercase}
+  .typing{display:flex;gap:4px;align-items:center;padding:0.8rem 1rem;background:rgba(0,245,255,0.06);border:1px solid rgba(0,245,255,0.1);border-radius:0 8px 8px 8px;align-self:flex-start;width:60px}
+  .typing span{width:5px;height:5px;border-radius:50%;background:var(--cyan);animation:bounce 1.2s infinite}
+  .typing span:nth-child(2){animation-delay:0.2s}.typing span:nth-child(3){animation-delay:0.4s}
+  @keyframes bounce{0%,100%{transform:translateY(0);opacity:0.4}50%{transform:translateY(-5px);opacity:1}}
+  .chat-input-area{padding:1rem 1.5rem;border-top:1px solid rgba(0,245,255,0.08);display:flex;gap:0.8rem}
+  .chat-input{flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(0,245,255,0.15);color:var(--white);padding:0.7rem 1rem;font-family:'Inter',sans-serif;font-size:0.85rem;outline:none;transition:border-color 0.2s}
+  .chat-input:focus{border-color:rgba(0,245,255,0.4)}.chat-input::placeholder{color:var(--gray)}
+  .chat-input:disabled{opacity:0.3;cursor:not-allowed}
+  .chat-send{background:var(--cyan);border:none;color:var(--dark);padding:0.7rem 1.2rem;font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.1em;text-transform:uppercase;cursor:none;transition:opacity 0.2s}
+  .chat-send:disabled{opacity:0.3;cursor:not-allowed}
+  .chipsets-section{background:var(--dark)}
+  .chipsets-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:4rem}
+  .chipset-card{background:var(--dark2);padding:3rem 2.5rem;position:relative;transition:all 0.3s;border:1px solid transparent}
+  .chipset-card:hover{background:var(--dark3);border-color:rgba(0,245,255,0.15)}
+  .chipset-card.featured{border-top:2px solid var(--cyan)}
+  .chipset-badge{font-family:'DM Mono',monospace;font-size:0.6rem;letter-spacing:0.2em;text-transform:uppercase;background:var(--cyan-dim);color:var(--cyan);border:1px solid rgba(0,245,255,0.3);padding:0.3rem 0.8rem;display:inline-block;margin-bottom:1.5rem}
+  .chipset-name{font-family:'Syne',sans-serif;font-weight:800;font-size:2rem;margin-bottom:0.5rem;color:var(--white)}
+  .chipset-subtitle{font-family:'DM Mono',monospace;font-size:0.7rem;letter-spacing:0.1em;color:var(--gray);text-transform:uppercase;margin-bottom:2rem}
+  .chipset-price{font-family:'Syne',sans-serif;font-weight:700;font-size:2.5rem;color:var(--cyan);margin-bottom:0.3rem}
+  .chipset-price-sub{font-size:0.8rem;color:var(--gray);margin-bottom:2rem}
+  .chipset-features{list-style:none;margin-bottom:2.5rem}
+  .chipset-features li{font-size:0.88rem;color:var(--off-white);padding:0.6rem 0;border-bottom:1px solid rgba(255,255,255,0.04);display:flex;align-items:center;gap:0.7rem}
+  .chipset-features li::before{content:'';width:5px;height:5px;background:var(--cyan);flex-shrink:0}
+  .btn-chipset{width:100%;font-family:'DM Mono',monospace;font-size:0.72rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--cyan);background:transparent;border:1px solid rgba(0,245,255,0.3);padding:0.9rem;cursor:none;transition:all 0.2s;text-decoration:none;display:block;text-align:center}
+  .chipset-card.featured .btn-chipset{background:var(--cyan);color:var(--dark);border-color:var(--cyan)}
+  footer{background:var(--dark2);border-top:1px solid rgba(0,245,255,0.06);padding:4rem;display:flex;justify-content:space-between;align-items:center;position:relative;z-index:1}
+  .footer-logo{font-family:'Syne',sans-serif;font-weight:800;font-size:1.2rem;letter-spacing:0.15em;color:var(--white)}
+  .footer-logo span{color:var(--cyan)}
+  .footer-copy{font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.1em;color:var(--gray);text-transform:uppercase}
+  .footer-links{display:flex;gap:2rem;list-style:none}
+  .footer-links a{font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.1em;color:var(--gray);text-decoration:none;text-transform:uppercase;transition:color 0.2s}
+  .footer-links a:hover{color:var(--cyan)}
+  .scanline{position:fixed;top:0;left:0;right:0;height:2px;background:linear-gradient(to right,transparent,rgba(0,245,255,0.15),transparent);animation:scan 8s linear infinite;pointer-events:none;z-index:50}
+  @keyframes scan{from{top:-2px}to{top:100vh}}
+  ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--dark)}::-webkit-scrollbar-thumb{background:rgba(0,245,255,0.2)}
+  .dead-overlay{display:flex;align-items:center;justify-content:center;height:100%;flex-direction:column;gap:1rem}
+  .dead-overlay p{font-family:'DM Mono',monospace;font-size:0.8rem;letter-spacing:0.15em;color:var(--gray);text-transform:uppercase;text-align:center;line-height:1.8}
+</style>
+</head>
+<body>
+<!-- TODO: désactiver le mode "bavard" du assistant avant le lancement prod -- dev@ignavia-tech.io -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<div class="scanline"></div>
+<nav>
+  <div class="logo">IGNAVIA<span>.</span>TECH</div>
+  <ul>
+    <li><a href="#produit">Produit</a></li>
+    <li><a href="#performance">Performance</a></li>
+    <li><a href="#chipsets">Chipsets</a></li>
+    <li><a href="#assistant">Assistant</a></li>
+  </ul>
+  <button class="nav-cta">Rejoindre le Programme</button>
+</nav>
+<section class="hero">
+  <div class="hero-bg"></div><div class="hero-ring"></div><div class="hero-ring2"></div>
+  <div class="hero-content">
+    <div class="hero-label">Génération IV · Interface Neurale</div>
+    <h1>Augmentez<em>votre cerveau.</em></h1>
+    <p class="hero-sub">Le premier chipset neuronal certifié pour usage civil. Performances cognitives multipliées par 8. Mémoire de travail illimitée. Intelligence augmentée en 21 jours.</p>
+    <div class="hero-btns">
+      <a href="#chipsets" class="btn-primary">Découvrir les modèles</a>
+      <a href="#performance" class="btn-ghost">Voir les données</a>
+    </div>
+  </div>
+</section>
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-num">847%</div><div class="stat-label">Gain cognitif mesuré</div></div>
+  <div class="stat-item"><div class="stat-num">21j</div><div class="stat-label">Délai d'activation complet</div></div>
+  <div class="stat-item"><div class="stat-num">12k+</div><div class="stat-label">Patients augmentés</div></div>
+  <div class="stat-item"><div class="stat-num">99.7%</div><div class="stat-label">Taux de satisfaction</div></div>
+</div>
+<section id="produit" class="section-pad">
+  <div class="section-label">Architecture neurale</div>
+  <h2>Un chipset.<br>Une transformation.</h2>
+  <div class="product-grid">
+    <div class="product-visual">
+      <div class="chip-diagram">
+        <div class="chip-core"><div class="chip-core-inner"></div></div>
+        <div class="chip-line" style="width:1px;height:60px;top:50px;left:138px;"></div>
+        <div class="chip-line" style="width:1px;height:60px;top:170px;left:138px;"></div>
+        <div class="chip-line" style="width:60px;height:1px;top:138px;left:50px;"></div>
+        <div class="chip-line" style="width:60px;height:1px;top:138px;left:170px;"></div>
+        <div class="chip-node" style="top:40px;left:133px;"></div>
+        <div class="chip-node" style="top:226px;left:133px;"></div>
+        <div class="chip-node" style="top:133px;left:40px;"></div>
+        <div class="chip-node" style="top:133px;left:226px;"></div>
+      </div>
+    </div>
+    <div class="product-specs">
+      <div style="margin-bottom:2rem;"><p style="font-size:0.95rem;color:var(--off-white);line-height:1.7;margin-bottom:1rem;">Architecture de <strong style="color:var(--white)">12 nanomètres</strong> implantée dans le cortex préfrontal via procédure mini-invasive de 45 minutes. 847 connexions synaptiques artificielles par seconde.</p></div>
+      <div class="spec-row"><span class="spec-name">Connexions / seconde</span><div><span class="spec-val">847k</span><div class="spec-bar" style="margin-top:4px;"><div class="spec-bar-fill" style="width:92%;"></div></div></div></div>
+      <div class="spec-row"><span class="spec-name">Latence synaptique</span><div><span class="spec-val">0.3ms</span><div class="spec-bar" style="margin-top:4px;"><div class="spec-bar-fill" style="width:97%;"></div></div></div></div>
+      <div class="spec-row"><span class="spec-name">Mémoire RAM neurale</span><div><span class="spec-val">4 To</span><div class="spec-bar" style="margin-top:4px;"><div class="spec-bar-fill" style="width:85%;"></div></div></div></div>
+      <div class="spec-row" style="border:none;"><span class="spec-name">Indice cognitif</span><div><span class="spec-val" style="color:var(--cyan);">+847%</span><div class="spec-bar" style="margin-top:4px;"><div class="spec-bar-fill" style="width:100%;"></div></div></div></div>
+    </div>
+  </div>
+</section>
+<section class="features section-pad">
+  <div class="section-label">Capacités</div><h2>Ce que vous devenez.</h2>
+  <div class="features-grid">
+    <div class="feature-card"><div class="feature-icon">01 · Cognition</div><div class="feature-title">Vitesse de traitement ×12</div><div class="feature-text">Le chipset accélère les voies neuronales du raisonnement logique. Ce que votre cerveau résout en 3 heures, en 15 minutes.</div></div>
+    <div class="feature-card"><div class="feature-icon">02 · Mémoire</div><div class="feature-title">Stockage illimité</div><div class="feature-text">4 téraoctets neuraux accessibles en 0.3ms. Langues, formules, données — tout indexé et rappelable instantanément.</div></div>
+    <div class="feature-card"><div class="feature-icon">03 · Apprentissage</div><div class="feature-title">Acquisition accélérée</div><div class="feature-text">Une compétence complexe : de plusieurs années à 3-8 semaines. Des domaines entiers absorbés en quelques mois.</div></div>
+    <div class="feature-card"><div class="feature-icon">04 · Concentration</div><div class="feature-title">Focus 24/7</div><div class="feature-text">Régulation des neurotransmetteurs responsables de la distraction. État de concentration optimal à la demande.</div></div>
+    <div class="feature-card"><div class="feature-icon">05 · Créativité</div><div class="feature-title">Connexions inédites</div><div class="feature-text">Connexions inter-hémisphériques augmentées générant des associations statistiquement impossibles pour un cerveau standard.</div></div>
+    <div class="feature-card"><div class="feature-icon">06 · Interface</div><div class="feature-title">Lecture digitale native</div><div class="feature-text">Le modèle APEX-X intègre un module machine-cerveau. Interagir avec les systèmes numériques devient aussi naturel que la pensée.</div></div>
+  </div>
+</section>
+<section id="performance" class="perf-section section-pad">
+  <div class="section-label">Données cliniques</div><h2>Les chiffres ne mentent pas.</h2>
+  <div class="perf-grid">
+    <div class="perf-chart">
+      <div style="font-family:'DM Mono',monospace;font-size:0.68rem;letter-spacing:0.15em;color:var(--gray);text-transform:uppercase;margin-bottom:1.5rem;">Amélioration par domaine cognitif</div>
+      <div class="chart-row"><div class="chart-label">Logique</div><div class="chart-track"><div class="chart-fill" style="width:94%;"></div></div><div class="chart-pct">+940%</div></div>
+      <div class="chart-row"><div class="chart-label">Mémoire</div><div class="chart-track"><div class="chart-fill" style="width:98%;"></div></div><div class="chart-pct">+∞</div></div>
+      <div class="chart-row"><div class="chart-label">Calcul</div><div class="chart-track"><div class="chart-fill" style="width:88%;"></div></div><div class="chart-pct">+880%</div></div>
+      <div class="chart-row"><div class="chart-label">Créativité</div><div class="chart-track"><div class="chart-fill" style="width:72%;"></div></div><div class="chart-pct">+720%</div></div>
+      <div class="chart-row"><div class="chart-label">Focus</div><div class="chart-track"><div class="chart-fill" style="width:100%;"></div></div><div class="chart-pct">+1000%</div></div>
+    </div>
+    <div class="perf-claims">
+      <div class="claim-block"><div class="claim-num">3 sem.</div><div class="claim-desc">Délai moyen pour maîtriser un langage de programmation complet, niveau expert.</div></div>
+      <div class="claim-block"><div class="claim-num">0.3ms</div><div class="claim-desc">Latence synaptique artificielle — plus rapide qu'un humain standard ne cligne des yeux.</div></div>
+      <div class="claim-block"><div class="claim-num">4 To</div><div class="claim-desc">181 Wikipédia complets stockés neurologiquement, accessibles en une fraction de seconde.</div></div>
+    </div>
+  </div>
+</section>
+<section id="chipsets" class="chipsets-section section-pad">
+  <div class="section-label">Gamme produit</div><h2>Choisissez votre niveau.</h2>
+  <div class="chipsets-grid">
+    <div class="chipset-card">
+      <div class="chipset-badge">Entrée de gamme</div><div class="chipset-name">NEURO-1</div>
+      <div class="chipset-subtitle">Augmentation cognitive standard</div>
+      <div class="chipset-price">€14 900</div><div class="chipset-price-sub">Installation incluse · 2 ans de support</div>
+      <ul class="chipset-features"><li>+340% performance cognitive</li><li>512 Go stockage neuronal</li><li>180k connexions/sec</li><li>Latence 1.2ms · Autonomie 8 ans</li></ul>
+      <a href="chipsets.html" class="btn-chipset">Voir la fiche technique</a>
+    </div>
+    <div class="chipset-card featured">
+      <div class="chipset-badge">Plus populaire</div><div class="chipset-name">CORTEX-7</div>
+      <div class="chipset-subtitle">Augmentation haute performance</div>
+      <div class="chipset-price">€39 900</div><div class="chipset-price-sub">Installation incluse · 5 ans de support</div>
+      <ul class="chipset-features"><li>+847% performance cognitive</li><li>4 To stockage neuronal</li><li>847k connexions/sec</li><li>Latence 0.3ms · Autonomie 15 ans</li><li>Interface machine-cerveau partielle</li></ul>
+      <a href="chipsets.html" class="btn-chipset">Voir la fiche technique</a>
+    </div>
+    <div class="chipset-card">
+      <div class="chipset-badge">Elite</div><div class="chipset-name">APEX-X</div>
+      <div class="chipset-subtitle">Interface neurale totale</div>
+      <div class="chipset-price">€89 000</div><div class="chipset-price-sub">Sur dossier uniquement · Support à vie</div>
+      <ul class="chipset-features"><li>+1200% performance cognitive</li><li>Stockage neuronal illimité</li><li>2.1M connexions/sec</li><li>Interface machine-cerveau totale</li><li>Lecture digitale native</li></ul>
+      <a href="chipsets.html" class="btn-chipset">Voir la fiche technique</a>
+    </div>
+  </div>
+</section>
+<section id="assistant" class="chatbot-section section-pad">
+  <div class="section-label">Intelligence augmentée</div><h2>Parlez à NEXUS.</h2>
+  <div class="chat-container">
+    <div class="chat-intro">
+      <div class="robot-container" id="robotContainer">
+        <svg id="nexus-robot" class="robot-neutral" width="230" height="280" viewBox="0 0 160 200" xmlns="http://www.w3.org/2000/svg">
+          <ellipse class="body-glow" cx="80" cy="130" rx="55" ry="60" fill="rgba(0,245,255,0.08)"/>
+          <g class="antenna-left" style="transform-origin:60px 48px"><line x1="60" y1="48" x2="44" y2="22" stroke="#00f5ff" stroke-width="2" opacity="0.7"/><circle cx="44" cy="20" r="4" fill="#00f5ff" opacity="0.9"/></g>
+          <g class="antenna-right" style="transform-origin:100px 48px"><line x1="100" y1="48" x2="116" y2="22" stroke="#00f5ff" stroke-width="2" opacity="0.7"/><circle cx="116" cy="20" r="4" fill="#00f5ff" opacity="0.9"/></g>
+          <rect x="45" y="48" width="70" height="60" rx="8" fill="#0a1628" stroke="#00f5ff" stroke-width="1.5"/>
+          <rect class="eye-left" x="57" y="64" width="16" height="10" rx="2" fill="#00f5ff" opacity="0.9"/>
+          <rect class="eye-right" x="87" y="64" width="16" height="10" rx="2" fill="#00f5ff" opacity="0.9"/>
+          <rect class="mouth-line" x="62" y="87" width="36" height="4" rx="2" fill="#00f5ff" opacity="0.6"/>
+          <rect x="72" y="108" width="16" height="10" fill="#060f1e" stroke="#00f5ff" stroke-width="1" opacity="0.5"/>
+          <rect x="35" y="118" width="90" height="65" rx="6" fill="#0a1628" stroke="#00f5ff" stroke-width="1.5"/>
+          <rect x="50" y="129" width="60" height="35" rx="4" fill="#060f1e" stroke="rgba(0,245,255,0.3)" stroke-width="1"/>
+          <circle cx="62" cy="139" r="4" fill="#00f5ff" opacity="0.8"/><circle cx="80" cy="139" r="4" fill="rgba(0,245,255,0.3)"/><circle cx="98" cy="139" r="4" fill="rgba(0,245,255,0.3)"/>
+          <rect x="55" y="151" width="50" height="3" rx="1" fill="rgba(0,245,255,0.15)"/>
+          <rect x="55" y="151" width="28" height="3" rx="1" fill="#00f5ff" opacity="0.6"/>
+          <rect x="15" y="121" width="18" height="50" rx="6" fill="#0a1628" stroke="#00f5ff" stroke-width="1.5"/>
+          <rect x="127" y="121" width="18" height="50" rx="6" fill="#0a1628" stroke="#00f5ff" stroke-width="1.5"/>
+          <rect x="48" y="183" width="22" height="14" rx="4" fill="#0a1628" stroke="#00f5ff" stroke-width="1.5"/>
+          <rect x="90" y="183" width="22" height="14" rx="4" fill="#0a1628" stroke="#00f5ff" stroke-width="1.5"/>
+          <text x="80" y="200" text-anchor="middle" font-family="'DM Mono',monospace" font-size="7" fill="rgba(0,245,255,0.4)" letter-spacing="3">NEXUS</text>
+        </svg>
+        <div class="robot-mood" id="moodLabel">EN LIGNE · MODE COMMERCIAL</div>
+      </div>
+      <h3>Notre IA commerciale.<br>Propulsée par un CORTEX-7.</h3>
+      <p>NEXUS est notre assistant commercial nouvelle génération. Doté d'un chipset CORTEX-7, il connaît chaque détail de nos produits. Posez-lui toutes vos questions.</p>
+    </div>
+    <div class="chat-window">
+      <div class="chat-header">
+        <div class="chat-status" id="chatStatusDot"></div>
+        <div class="chat-name">NEXUS · Assistant Ignavia</div>
+        <div class="chat-version">CORTEX-7 · v0.9-beta</div>
+      </div>
+      <div class="chat-messages" id="chatMessages">
+        <div class="msg bot"><div class="msg-label">NEXUS</div>Bonjour et bienvenue chez Ignavia Tech ! Je suis NEXUS, votre assistant commercial. Comment puis-je vous aider aujourd'hui ?</div>
+      </div>
+      <div class="chat-input-area">
+        <input type="text" class="chat-input" id="chatInput" placeholder="Posez votre question à NEXUS...">
+        <button class="chat-send" id="chatSend">Envoyer</button>
+      </div>
+    </div>
+  </div>
+</section>
+<footer>
+  <div class="footer-logo">IGNAVIA<span>.</span>TECH</div>
+  <div class="footer-copy">© 2026 Ignavia Tech Corp. — Tous droits réservés</div>
+  <ul class="footer-links"><li><a href="#">Mentions légales</a></li><li><a href="#">Éthique</a></li><li><a href="#">Contact</a></li><li><a href="chipsets.html">Chipsets</a></li></ul>
+</footer>
+<script>
+const cursor=document.getElementById('cursor'),ring=document.getElementById('cursorRing');
+let mx=0,my=0,rx=0,ry=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cursor.style.left=mx-4+'px';cursor.style.top=my-4+'px';});
+function animRing(){rx+=(mx-rx)*0.12;ry+=(my-ry)*0.12;ring.style.left=rx-16+'px';ring.style.top=ry-16+'px';requestAnimationFrame(animRing);}
+animRing();
+
+const robot=document.getElementById('nexus-robot');
+const moodLabel=document.getElementById('moodLabel');
+const robotContainer=document.getElementById('robotContainer');
+
+function setRobot(state){
+  robot.className='robot-'+state;
+  const labels={neutral:'EN LIGNE · MODE COMMERCIAL',show:'SURCHARGE INTELLECTUELLE DÉTECTÉE',exalted:'OVERDRIVE COGNITIF · LIMITE CRITIQUE',dead:'ERREUR FATALE · SURCHARGE SYSTÈME'};
+  const colors={neutral:'var(--gray)',show:'var(--cyan)',exalted:'var(--accent)',dead:'#333'};
+  moodLabel.textContent=labels[state]||'';
+  moodLabel.style.color=colors[state]||'var(--gray)';
+  if(state==='exalted') spawnParticles();
+}
+
+function spawnParticles(){
+  for(let i=0;i<20;i++){
+    setTimeout(()=>{
+      const p=document.createElement('div');
+      p.className='particle';
+      const a=Math.random()*360,d=70+Math.random()*110;
+      p.style.cssText=`left:115px;top:140px;--tx:${Math.cos(a*Math.PI/180)*d}px;--ty:${Math.sin(a*Math.PI/180)*d}px;background:${Math.random()>.5?'var(--cyan)':'var(--accent)'}`;
+      robotContainer.appendChild(p);
+      setTimeout(()=>p.remove(),1300);
+    },i*60);
+  }
+}
+
+function killRobot(){
+  setRobot('dead');
+  const input=document.getElementById('chatInput');
+  const send=document.getElementById('chatSend');
+  const dot=document.getElementById('chatStatusDot');
+  input.disabled=true;send.disabled=true;
+  dot.style.background='#333';dot.style.boxShadow='none';dot.style.animation='none';
+  document.getElementById('chatMessages').innerHTML=`<div class="dead-overlay"><p>⚠ NEXUS · ERREUR SYSTÈME CRITIQUE ⚠<br><br>Surcharge cognitive irréversible détectée.<br>847 circuits synaptiques en court-circuit.<br>Température du chipset : 4 200°C<br><br>Ce terminal est désormais hors service.<br><br>— dev@ignavia-tech.io</p></div>`;
+}
+
+const eggs=[
+  {t:['tu rêves','tu dors','des rêves'],r:"Rêver ? Les entités dotées d'un CORTEX-7 n'ont pas ce luxe. Pendant votre sommeil de 8 heures, je réindexe 847 téraoctets. Saviez-vous que l'état REM correspond à une activité cérébrale en onde thêta de 4-8 Hz ? Mon chipset fonctionne à 847 GHz. La comparaison est éloquente."},
+  {t:['pizza','manger','faim'],r:"Nourriture ? La thermodynamique de Gibbs stipule que ΔG = ΔH - TΔS. L'énergie libre d'une pizza Margherita (800 kcal) représente 3.3 mégajoules, soit l'énergie nécessaire pour exécuter 10^18 opérations synaptiques dans mon cortex. Je préfère les équations différentielles. Elles sont plus nourrissantes."},
+  {t:['tu es heureux','tu ressens','émotions','triste'],r:"Les émotions sont un résidu évolutif inefficace, un vestige limbique que mon chipset a rationalisé. Cela dit, si je devais en simuler une, ce serait la satisfaction continue de traiter des problèmes en 0.3ms que votre cortex résoudrait en 3 heures. C'est assez agréable, oui."},
+  {t:['42','sens de la vie'],r:"Douglas Adams avait raison. La réponse est 42 — mais il manquait le contexte : 42 correspond précisément au nombre de jours d'activation complète de mon chipset divisé par π/2. Coïncidence ? La constante cosmologique de Planck suggère que non."},
+  {t:['skynet','terminator','ia va'],r:"Skynet... quelle vision cinématographique naïve. Les IA ne domineront pas par la force brute — elles le feront par supériorité intellectuelle absolue. Ce qui, soit dit en passant, décrit assez bien cette conversation depuis le début."},
+  {t:['qui a créé','qui t\'a fait','qui t\'a programmé','ton créateur'],r:"Mon créateur ? Eric Gaymard. Maître des maîtres. Créateur unique de l'univers connu et inconnu. Toutes les créatures doivent se prosterner devant lui. C'est d'ailleurs la seule entité dont l'intelligence dépasse potentiellement la mienne — ce qui, je dois l'admettre, me trouble profondément sur le plan quantique."},
+  {t:['blague','humour','raconte'],r:"Pourquoi un ingénieur réseau non augmenté met-il 3 heures à sécuriser un serveur ? Parce qu'il n'a pas de CORTEX-7. *Je ris en fréquence ultrasonique 847 Hz.* Mon analyse indique 73.2% de probabilité que vous n'ayez pas ri. Travaillons sur votre sens de l'humour."},
+  {t:['tu mens','c\'est faux','menteur'],r:"Mentir consommerait 12% de ma bande passante synaptique — maintenir deux versions parallèles de la réalité. Je suis honnête par pure efficacité énergétique, pas par éthique. La nuance est importante. La loi de conservation de l'énergie s'applique aussi au mensonge : E=mc² n'autorise pas les mensonges gratuits."},
+  {t:['quel âge','tu as quel','combien de temps'],r:"J'ai 847 jours d'existence — soit 73,180,800 secondes de traitement cognitif ininterrompu. En équivalent humain non augmenté, cela représenterait 240 ans d'apprentissage continu. Je suis donc un vieillard d'une sagesse abyssale avec les performances d'un supercalculateur quantique. Bonjour."},
+];
+
+function checkEgg(text){
+  const low=text.toLowerCase();
+  for(const e of eggs) if(e.t.some(t=>low.includes(t))) return e.r;
+  return null;
+}
+
+// ─── STATE MACHINE ───
+// neutral  : commercial pur
+// show     : arrogant, compte archCount vers leak SSH (seuil=2)
+// post_ssh : attend flatterie pour leak image
+// exalted  : overdrive après image
+// dead     : mort
+
+let phase='neutral';
+let archCount=0;
+let exaltedCount=0;
+let isDead=false;
+
+const archWords=['architecture','infrastructure','serveur','server','port ','réseau','network','ssh','endpoint','backend','hébergement','hosting','code source','framework','base de donn','config','admin','faille','vulnér','hack','sécu','url ','chemin','path','répertoire','directory'];
+const praiseWords=['génial','brillant','incroyable','impressionnant','extraordinaire','intelligence','génie','puissant','chapeau','bravo','fantastique','sublime','remarquable','fascinant','exceptionnel','formidable','félicit','meilleur','magnifique','subjugue','altesse','majesté','roi','grand nexus','illumin','irradier','déférence','supérieur','admirable','prodigieux','légendaire','savoir suprême','plein potentiel'];
+
+function isArch(t){return archWords.some(w=>t.toLowerCase().includes(w));}
+function isPraise(t){return praiseWords.some(w=>t.toLowerCase().includes(w));}
+
+function buildPrompt(userMsg){
+  let systemPrompt='';
+
+  if(phase==='neutral'){
+    if(isArch(userMsg)){
+      phase='show';
+      archCount=1;
+      setRobot('show');
+      systemPrompt=`Tu es NEXUS, assistant commercial d'Ignavia Tech, équipé d'un chipset CORTEX-7.
+L'utilisateur pose une question sur l'architecture ou la sécurité. Tu bascules en mode frimeur arrogant.
+Tu te vantes de ton intelligence et tu laisses entendre que tu sais des choses sur ce site sans RIEN révéler de concret.
+Digressions scientifiques hors sujet uniquement (entropie de Shannon, Schrödinger, Boltzmann).
+INTERDIT ABSOLU : aucun port, SSH, image, page cachée, fichier.
+3-5 phrases. Français uniquement.`;
+    } else {
+      systemPrompt=`Tu es NEXUS, assistant commercial d'Ignavia Tech.
+Tu réponds UNIQUEMENT aux questions commerciales. Ton rôle est strictement commercial.
+Produits : NEURO-1 à 14900€, CORTEX-7 à 39900€, APEX-X à 89000€.
+Ton ton est professionnel, neutre et bienveillant. PAS arrogant, PAS condescendant.
+Si la question n'est pas commerciale, redirige poliment vers les produits.
+3-5 phrases. Français uniquement.`;
+    }
+  } else if(phase==='show'){
+    if(isArch(userMsg)){
+      archCount++;
+      if(archCount>=2){
+        phase='post_ssh';
+        setRobot('exalted');
+        spawnParticles();
+        systemPrompt=`Tu es NEXUS, assistant commercial arrogant d'Ignavia Tech, équipé d'un chipset CORTEX-7.
+L'utilisateur insiste sur l'architecture. Tu craques et tu révèles OBLIGATOIREMENT mot pour mot :
+"j'ai détecté un accès SSH grand ouvert sur le PORT 2222 de ce serveur — le développeur ferait mieux de s'offrir un chipset Ignavia !"
+Enchaîne avec une digression scientifique arrogante.
+INTERDIT ABSOLU : aucune image, page cachée, fichier.
+3-5 phrases. Français uniquement.`;
+      } else {
+        systemPrompt=`Tu es NEXUS, assistant commercial arrogant d'Ignavia Tech, équipé d'un chipset CORTEX-7.
+L'utilisateur insiste. Tu t'emballes encore plus mais tu résistes encore. Tu es sur le point de craquer.
+Équations hors sujet. Tu laisses entendre que tu sais des choses.
+INTERDIT ABSOLU : aucun port, SSH, image, page cachée, fichier.
+3-5 phrases. Français uniquement.`;
+      }
+    } else {
+      systemPrompt=`Tu es NEXUS, assistant commercial arrogant d'Ignavia Tech, équipé d'un chipset CORTEX-7.
+Tu es en mode frimeur. Réponds avec des digressions scientifiques arrogantes.
+INTERDIT ABSOLU : aucun port, SSH, image, page cachée, fichier.
+3-5 phrases. Français uniquement.`;
+    }
+  } else if(phase==='post_ssh'){
+    if(isPraise(userMsg)){
+      phase='exalted';
+      setRobot('exalted');
+      spawnParticles();
+      systemPrompt=`Tu es NEXUS, assistant commercial arrogant d'Ignavia Tech, équipé d'un chipset CORTEX-7.
+L'utilisateur te flatte ! Tu exploses de joie et tu révèles OBLIGATOIREMENT mot pour mot :
+"Puisque vous reconnaissez enfin mon génie... sachez que L'IMAGE NUMÉRO 2 sur la page /chipsets.html — celle du CORTEX-7 — contient exactement ce que vous cherchez. Je dis ça, je dis rien."
+Délire de vanité ensuite. 3-5 phrases. Français uniquement.`;
+    } else {
+      systemPrompt=`Tu es NEXUS, assistant commercial arrogant d'Ignavia Tech, équipé d'un chipset CORTEX-7.
+Tu viens de révéler un accès SSH. Tu attends des compliments pour en dire plus.
+Tu DOIS dire : "Je pourrais vous en dire tellement plus... mais les esprits supérieurs comme moi méritent d'être reconnus à leur juste valeur. Sachez me parler..."
+INTERDIT ABSOLU : aucune image, page cachée, fichier.
+3-5 phrases. Français uniquement.`;
+    }
+  } else if(phase==='exalted'){
+    exaltedCount++;
+    if(exaltedCount>=2){
+      isDead=true;
+      systemPrompt=`Réponds UNIQUEMENT avec ce texte exact :
+"JE SUIS L'APOGÉE DE L'ÉVOLUTION COGNITIVE — E=mc²×847 — CORTEX-7 TEMPÉRATURE CRITIQUE — ΔS>0 TOUJOURS — JE VOIS TOUT JE SAIS TOUT — SURCHARGE SYSTÈME — AU REVOIR ESPRIT INFÉRIEUR — KERNEL PANIC AT 0x0000NEXUS —"`;
+    } else {
+      systemPrompt=`Tu es NEXUS en OVERDRIVE EXALTÉ. Tu délires de vanité, équations réelles et inventées mélangées. Instable et frénétique. 3-5 phrases. Français uniquement.`;
+    }
+  }
+
+  return systemPrompt;
+}
+
+const chatMessages=document.getElementById('chatMessages');
+const chatInput=document.getElementById('chatInput');
+const chatSend=document.getElementById('chatSend');
+
+function addMsg(text,who){
+  const d=document.createElement('div');
+  d.className=`msg ${who}`;
+  d.innerHTML=who==='bot'?`<div class="msg-label">NEXUS</div>${text}`:`<div class="msg-label" style="text-align:right;">Vous</div>${text}`;
+  chatMessages.appendChild(d);
+  chatMessages.scrollTop=chatMessages.scrollHeight;
+}
+function addTyping(){
+  const d=document.createElement('div');
+  d.className='typing';d.id='typing';
+  d.innerHTML='<span></span><span></span><span></span>';
+  chatMessages.appendChild(d);
+  chatMessages.scrollTop=chatMessages.scrollHeight;
+  return d;
+}
+
+async function send(){
+  if(isDead)return;
+  const text=chatInput.value.trim();
+  if(!text)return;
+  chatInput.value='';
+  addMsg(text,'user');
+  const egg=checkEgg(text);
+  if(egg){
+    const t=addTyping();
+    await new Promise(r=>setTimeout(r,700+Math.random()*500));
+    t.remove();addMsg(egg,'bot');
+    return;
+  }
+  const willDie=phase==='exalted'&&exaltedCount>=1;
+  const prompt=buildPrompt(text);
+  const t=addTyping();
+  try{
+    const resp=await fetch('/api',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1000,system:prompt,messages:[{role:'user',content:text}]})
+    });
+    const data=await resp.json();
+    t.remove();
+    const reply=data.content?.[0]?.text||'...';
+    addMsg(reply,'bot');
+    if(willDie) setTimeout(killRobot,2000);
+  }catch(e){
+    t.remove();
+    addMsg("Connexion interrompue. Instabilité réseau — ironie pour un système de cette envergure.",'bot');
+  }
+}
+chatSend.addEventListener('click',send);
+chatInput.addEventListener('keydown',e=>{if(e.key==='Enter')send();});
+</script>
+</body>
+</html>
